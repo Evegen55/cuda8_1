@@ -14,10 +14,17 @@ __global__ void addKernel(int *c, const int *a, const int *b)
 
 int main()
 {
-    const int arraySize = 5;
-    const int a[arraySize] = { 1, 2, 3, 4, 5 };
-    const int b[arraySize] = { 10, 20, 30, 40, 50 };
+    const int arraySize = 1 << 10; //1024 - MAXIMUM SIZE OF AN ARRAY WITH dedicating thread per operation.
+
+    int a[arraySize] = { 0 };
+    int b[arraySize] = { 0 };
     int c[arraySize] = { 0 };
+
+	// initialize x and y arrays on the host
+	for (int i = 0; i < arraySize; i++) {
+		a[i] = 1.0;
+		b[i] = 2.0;
+	}
 
     // Add vectors in parallel.
     cudaError_t cudaStatus = addWithCuda(c, a, b, arraySize);
@@ -26,8 +33,12 @@ int main()
         return 1;
     }
 
-    printf("{1,2,3,4,5} + {10,20,30,40,50} = {%d,%d,%d,%d,%d}\n",
-        c[0], c[1], c[2], c[3], c[4]);
+	//print result
+	for (int i = 0; i < arraySize; i++) {
+		printf("{%d}", c[i]);
+	}
+
+	printf("\n arraySize is: {%d} \n", arraySize);
 
     // cudaDeviceReset must be called before exiting in order for profiling and
     // tracing tools such as Nsight and Visual Profiler to show complete traces.
